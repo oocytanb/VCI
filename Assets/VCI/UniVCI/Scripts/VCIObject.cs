@@ -21,8 +21,7 @@ namespace VCI
             public TargetEngine targetEngine;
 
 #if UNITY_EDITOR
-            [SerializeField, FilePath("lua")]
-            public string filePath;
+            public TextAsset textAsset;
 #endif
 
             [SerializeField, TextArea]
@@ -61,6 +60,15 @@ namespace VCI
             if (Scripts.Any())
             {
                 Scripts.First().name = "main";
+#if UNITY_EDITOR
+                foreach (var script in Scripts)
+                {
+                    if (script.textAsset != null)
+                    {
+                        script.source = script.textAsset.text;
+                    }
+                }
+#endif
             }
         }
     }

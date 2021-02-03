@@ -15,6 +15,7 @@ namespace VCI
     {
         private const string DATE_FORMAT = "yyyyMMdd";
         private const string PREFIX = "UniVCI";
+        private const string PACKAGE_DIR = @"BuildPackages";
 
         private static string System(string dir, string fileName, string args)
         {
@@ -52,12 +53,26 @@ namespace VCI
         {
             //var date = DateTime.Today.ToString(DATE_FORMAT);
 
-            var path = string.Format("{0}/{1}.unitypackage",
+            var path = string.Format("{0}/{1}.{2}.unitypackage",
                 folder,
-                VCIVersion.VCI_VERSION
+                VCIVersion.VCI_VERSION,
+                VCIVersion.PATCH_NUMBER
             ).Replace("\\", "/");
 
             return path;
+        }
+
+        private static void CleanUpDirectory(string targetDirectoryPath)
+        {
+            if (Directory.Exists(targetDirectoryPath))
+            {
+                string[] filePaths = Directory.GetFiles(targetDirectoryPath);
+                foreach (string filePath in filePaths)
+                {
+                    File.SetAttributes(filePath, FileAttributes.Normal);
+                    File.Delete(filePath);
+                }
+            }
         }
 
         private static IEnumerable<string> EnumerateFiles(string path, Func<string, bool> isExclude = null)
@@ -163,7 +178,14 @@ namespace VCI
 #endif
         public static void CreateUnityPackage()
         {
-            var folder = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            var folder = Path.Combine(Path.GetFullPath(Path.Combine(Application.dataPath, "..")), PACKAGE_DIR);
+
+            if(!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            CleanUpDirectory(folder);
 
             var path = GetPath(folder);
             /*
